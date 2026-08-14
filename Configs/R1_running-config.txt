@@ -1,0 +1,105 @@
+!
+version 15.4
+service timestamps log datetime msec
+service timestamps debug datetime msec
+no service password-encryption
+!
+hostname R1
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+username IT-Admin privilege 15 secret 5 $1$mERr$XJVIsXfXnp8eBZKRTT9lD0
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip ssh version 2
+ip domain-name corp.local
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 10.0.0.1 255.255.255.255
+!
+interface GigabitEthernet0/0/0
+ ip address 10.0.100.1 255.255.255.252
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1
+ ip address 10.0.100.5 255.255.255.252
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/2
+ description CONNECTION_TO_ISP
+ ip address 203.0.113.2 255.255.255.252
+ ip nat outside
+ duplex auto
+ speed auto
+!
+router ospf 1
+ router-id 10.0.0.1
+ log-adjacency-changes
+ network 10.0.0.1 0.0.0.0 area 0
+ network 10.0.100.0 0.0.0.255 area 0
+ default-information originate
+!
+ip nat inside source list NAT_ADDRESSES interface GigabitEthernet0/0/2 overload
+ip classless
+ip route 0.0.0.0 0.0.0.0 203.0.113.1 
+!
+ip flow-export version 9
+!
+!
+ip access-list standard ADMIN_SSH_ACCESS
+ remark Allow IT-Office Subnet
+ permit 10.0.10.0 0.0.0.255
+ remark Allow IT-Management Subnet
+ permit 10.0.99.0 0.0.0.255
+ip access-list standard NAT_ADDRESSES
+ permit 10.0.0.0 0.255.255.255
+!
+!
+!
+!
+!
+logging 10.0.99.10
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ access-class ADMIN_SSH_ACCESS in
+ login local
+ transport input ssh
+!
+!
+ntp server 10.0.99.10
+!
+end
+
