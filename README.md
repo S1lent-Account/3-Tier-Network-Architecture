@@ -3,9 +3,9 @@
 ##  Executive Summary
 This project demonstrates the end-to-end design, configuration, and deployment of a highly available, secure, and scalable enterprise network infrastructure. Built utilizing Cisco Packet Tracer, the architecture spans a Layer 3 Core and three distinct physical sites (IT Department, Office 1, and Office 2). The design prioritizes defense-in-depth security, seamless gateway redundancy, and centralized auditing to meet modern enterprise business requirements.
 
-##  Business Objectives & Solutions
+## Business Objectives & Solutions
 * **Maximum Uptime & Redundancy:** Eliminated single points of failure at the distribution layer using **HSRP (Hot Standby Router Protocol)** and logically aggregated physical links using **EtherChannel (Port-Channels)** to prevent network loops while maximizing bandwidth.
-* **Zero-Trust Internal Security:** Hardened user-facing access layers via **Port Security (Sticky MAC)** and strict **VTY Access Control Lists (ACLs)**. Administrative SSH access is completely restricted to dedicated IT management subnets.
+* **Zero-Trust Internal Security:** Hardened user-facing access layers via **Port Security (Sticky MAC)**, strict **VTY Access Control Lists (ACLs)**, **DHCP Snooping**, and **Dynamic ARP Inspection (DAI)** to prevent Man-in-the-Middle (MitM) attacks. Administrative SSH access is completely restricted to dedicated IT management subnets.
 * **Public & Guest Isolation:** Engineered a dedicated Guest WiFi network isolated by **Extended ACLs**, permitting internet access while completely blocking horizontal movement into corporate `10.x.x.x` infrastructure.
 * **Centralized Compliance Auditing:** Standardized network time via an **NTP Server** and centralized all switch/router trap alerts to a dedicated **Syslog Server** for real-time security monitoring and hardware diagnostics.
 
@@ -31,10 +31,11 @@ The network utilizes a modular IP schema to allow for rapid scalability across p
 
 *(Note: Layer 3 Core transits utilize strict `10.0.100.x /30` point-to-point networks).*
 
-##  Security Hardening Implementations
+## Security Hardening Implementations
 1. **Management Plane Protection:** Telnet is globally disabled. Management access is enforced via **SSHv2** using RSA 2048-bit encryption keys.
 2. **Password Encryption:** Global `service password-encryption` enabled to eliminate plain-text credentials in the configuration files, paired with Type 5 secure hashing for the administrative account.
 3. **Guest Network Containment:** The `GUEST_ISOLATION` Extended ACL is applied inbound on the Guest WiFi VLAN, dropping all packets destined for private address space while allowing DHCP, DNS, and HTTP/HTTPS outbound.
+4. **Layer 2 Threat Mitigation:** Deployed **DHCP Snooping** and **Dynamic ARP Inspection (DAI)** across all access switches, establishing explicit trust boundaries on distribution uplinks and server ports to neutralize rogue DHCP servers and ARP spoofing.
 
 ##  How to Navigate This Repository
 * `/Configurations/` - Contains the raw Cisco IOS `running-config` text files for all Core Switches (CSW), Distribution Switches (DSW), Access Switches (ASW), and Edge Routers.
